@@ -18,10 +18,8 @@ public class MilitanteDAO {
    public boolean cargarMilitantesDePartido(Connection conn, DefaultTableModel modelotabla, double cantidadMinima, String ideologia) throws SQLException {
     boolean comp = false;
 
-    // Limpiar la tabla antes de cargar nuevos datos
-    modelotabla.setRowCount(0);
+     modelotabla.setRowCount(0);
 
-    // Consulta principal para militantes
     String consulta = """
         SELECT m.Nombre, m.EsPolitico, m.Edad
         FROM Militante m
@@ -37,9 +35,8 @@ public class MilitanteDAO {
     ResultSet rs = sentencia.executeQuery();
 
     while (rs.next()) {
-        modelotabla.setRowCount(modelotabla.getRowCount() + 1); // Añadir nueva fila vacía
+        modelotabla.setRowCount(modelotabla.getRowCount() + 1); 
 
-        // Llenar las columnas de la tabla
         modelotabla.setValueAt(rs.getString("Nombre"), modelotabla.getRowCount() - 1, 0);
         modelotabla.setValueAt(rs.getBoolean("EsPolitico"), modelotabla.getRowCount() - 1, 1);
         modelotabla.setValueAt(rs.getInt("Edad"), modelotabla.getRowCount() - 1, 2);

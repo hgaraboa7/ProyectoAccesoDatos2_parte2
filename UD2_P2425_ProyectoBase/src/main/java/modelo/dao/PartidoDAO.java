@@ -120,21 +120,27 @@ public class PartidoDAO {
 //        return partido;
 //    }
 //
-//    return null; // Si no se encuentra el partido
+//    return null; 
 //}
-public boolean cargarPartidosPorFraudeYMilitantes(Connection conn, DefaultTableModel modelotabla, double cantidadMinima, int militantesMinimos) throws SQLException {
+public boolean cargarPartidosPorFraudeYMilitantes(Connection conn, DefaultTableModel modelotabla, double cantidadMinima, int militantesMinimos) throws SQLException { 
     boolean comp = false;
 
-     modelotabla.setRowCount(0);
+    // Limpiar la tabla antes de cargar nuevos datos
+    modelotabla.setRowCount(0);
 
-     String consulta = """
+    String consulta = """
         SELECT p.IDPartido, p.Nombre, p.Ideologia, p.Fundacion
         FROM Partido p
         JOIN PartidoCasoCorrupcion pc ON p.IDPartido = pc.IDPartido
         JOIN CasoDeCorrupcion c ON pc.IDCaso = c.IDCaso
+        WHERE (SELECT COUNT(m.IDMilitante) 
+               FROM Militante m 
+               WHERE m.IDPartido = p.IDPartido AND m.EsPolitico = TRUE) > 10
         GROUP BY p.IDPartido, p.Nombre, p.Ideologia, p.Fundacion
-        HAVING SUM(pc.CantidadFraude) > ? AND COUNT((SELECT m.IDMilitante FROM Militante m WHERE m.IDPartido = p.IDPartido)) > ?
+        HAVING SUM(pc.CantidadFraude) > ? 
+           AND (SELECT COUNT(m.IDMilitante) FROM Militante m WHERE m.IDPartido = p.IDPartido) > ?
     """;
+
     PreparedStatement sentencia = conn.prepareStatement(consulta);
     sentencia.setDouble(1, cantidadMinima);
     sentencia.setInt(2, militantesMinimos);
@@ -144,7 +150,8 @@ public boolean cargarPartidosPorFraudeYMilitantes(Connection conn, DefaultTableM
     while (rs.next()) {
         modelotabla.setRowCount(modelotabla.getRowCount() + 1); // Añadir nueva fila vacía
 
-         modelotabla.setValueAt(rs.getInt("IDPartido"), modelotabla.getRowCount() - 1, 0);
+        // Llenar las columnas de la tabla fila por fila
+        modelotabla.setValueAt(rs.getInt("IDPartido"), modelotabla.getRowCount() - 1, 0);
         modelotabla.setValueAt(rs.getString("Nombre"), modelotabla.getRowCount() - 1, 1);
         modelotabla.setValueAt(rs.getString("Ideologia"), modelotabla.getRowCount() - 1, 2);
         modelotabla.setValueAt(rs.getDate("Fundacion"), modelotabla.getRowCount() - 1, 3);
@@ -154,6 +161,7 @@ public boolean cargarPartidosPorFraudeYMilitantes(Connection conn, DefaultTableM
 
     return comp;
 }
+
 
 
 

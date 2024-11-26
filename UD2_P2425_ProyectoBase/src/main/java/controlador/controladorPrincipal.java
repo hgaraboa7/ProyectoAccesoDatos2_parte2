@@ -198,6 +198,7 @@ public static void cargarPartidosPorFraudeYMilitantes() {
         mySQLFactory.releaseConnection(conn);
     }
 }
+
 public static void cargarMilitantesDePartido() {
     Connection conn = null;
     try {
